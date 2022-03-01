@@ -9,11 +9,11 @@ import (
 	"net/http"
 )
 
-type Customer struct {
-	Name    string `json:"full_name" xml:"name"`
-	City    string `json:"city" xml:"city"`
-	Zipcode string `json:"zpi_code" xml:"zipcode"`
-}
+//type Customer struct {
+//	Name    string `json:"full_name" xml:"name"`
+//	City    string `json:"city" xml:"city"`
+//	Zipcode string `json:"zpi_code" xml:"zipcode"`
+//}
 
 type CustomerHandler struct {
 	service service.CustomerService
@@ -41,11 +41,17 @@ func (c *CustomerHandler) getTheCustomer(w http.ResponseWriter, r *http.Request)
 
 	customer, err := c.service.GetTheCustomer(id)
 	if err != nil {
-		w.WriteHeader(err.Code)
-		fmt.Fprint(w, err.Message)
+		WriteResponse(w, err.Code, err.AsMessage())
 	} else {
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(customer)
+		WriteResponse(w, http.StatusOK, customer)
+	}
+}
+
+func WriteResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		panic(err)
 	}
 }
 
