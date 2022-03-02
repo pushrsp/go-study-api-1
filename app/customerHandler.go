@@ -2,7 +2,6 @@ package app
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/pushrsp/banking/service"
@@ -24,14 +23,11 @@ func greet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CustomerHandler) getAllCustomers(w http.ResponseWriter, r *http.Request) {
-	customers, _ := c.service.GetAllCustomers()
-
-	if r.Header.Get("Content-Type") == "application/xml" {
-		w.Header().Add("Content-Type", "application/xml")
-		xml.NewEncoder(w).Encode(customers)
+	customers, err := c.service.GetAllCustomers(r.URL.Query().Get("status"))
+	if err != nil {
+		WriteResponse(w, err.Code, err.AsMessage())
 	} else {
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(customers)
+		WriteResponse(w, http.StatusOK, customers)
 	}
 }
 
